@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/visa-genius/static/css/main.a5911e14.css",
-    "main.js": "/visa-genius/static/js/main.eb775816.js",
-    "static/js/453.1e28717c.chunk.js": "/visa-genius/static/js/453.1e28717c.chunk.js",
-    "static/media/Sample 1.png": "/visa-genius/static/media/Sample 1.ad716f4643f7f1526cb6.png",
-    "index.html": "/visa-genius/index.html",
-    "main.a5911e14.css.map": "/visa-genius/static/css/main.a5911e14.css.map",
-    "main.eb775816.js.map": "/visa-genius/static/js/main.eb775816.js.map",
-    "453.1e28717c.chunk.js.map": "/visa-genius/static/js/453.1e28717c.chunk.js.map"
+    "main.css": "/static/css/main.a5911e14.css",
+    "main.js": "/static/js/main.5c4b87e4.js",
+    "static/js/453.1e28717c.chunk.js": "/static/js/453.1e28717c.chunk.js",
+    "static/media/Sample 1.png": "/static/media/Sample 1.ad716f4643f7f1526cb6.png",
+    "index.html": "/index.html",
+    "main.a5911e14.css.map": "/static/css/main.a5911e14.css.map",
+    "main.5c4b87e4.js.map": "/static/js/main.5c4b87e4.js.map",
+    "453.1e28717c.chunk.js.map": "/static/js/453.1e28717c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a5911e14.css",
-    "static/js/main.eb775816.js"
+    "static/js/main.5c4b87e4.js"
   ]
 }
