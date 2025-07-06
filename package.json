@@ -2,7 +2,7 @@
   "name": "visa-genius",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://siddharth-sunchu.github.io/visa-genius",
+  "homepage": "https://shalmalipatil.com",
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@testing-library/dom": "^10.4.0",
