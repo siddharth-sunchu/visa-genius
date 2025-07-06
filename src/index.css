@@ -1,0 +1,456 @@
+@import 'antd/dist/reset.css';
+@import './styles/theme.css';
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #fafafa;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom button hover effects */
+.ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card hover effects */
+.ant-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Custom focus styles */
+.ant-input:focus,
+.ant-input-focused {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Responsive text */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+  
+  h3 {
+    font-size: 18px !important;
+  }
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Custom form styles */
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section-title {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Custom tag styles */
+.custom-tag {
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-weight: 500;
+}
+
+/* Custom progress styles */
+.custom-progress .ant-progress-bg {
+  border-radius: 4px;
+}
+
+/* Custom modal styles */
+.custom-modal .ant-modal-content {
+  border-radius: 12px;
+}
+
+.custom-modal .ant-modal-header {
+  border-radius: 12px 12px 0 0;
+}
+
+/* Custom table styles */
+.custom-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* Custom dropdown styles */
+.custom-dropdown .ant-dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom tooltip styles */
+.custom-tooltip .ant-tooltip-inner {
+  border-radius: 6px;
+}
+
+/* Custom notification styles */
+.custom-notification .ant-notification-notice {
+  border-radius: 8px;
+}
+
+/* Custom message styles */
+.custom-message .ant-message-notice-content {
+  border-radius: 8px;
+}
+
+/* Custom alert styles */
+.custom-alert .ant-alert {
+  border-radius: 8px;
+}
+
+/* Custom steps styles */
+.custom-steps .ant-steps-item-icon {
+  border-radius: 50%;
+}
+
+.custom-steps .ant-steps-item-process .ant-steps-item-icon {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+/* Custom tabs styles */
+.custom-tabs .ant-tabs-tab {
+  border-radius: 6px 6px 0 0;
+}
+
+/* Custom pagination styles */
+.custom-pagination .ant-pagination-item {
+  border-radius: 6px;
+}
+
+/* Custom select styles */
+.custom-select .ant-select-selector {
+  border-radius: 6px;
+}
+
+/* Custom date picker styles */
+.custom-date-picker .ant-picker {
+  border-radius: 6px;
+}
+
+/* Custom time picker styles */
+.custom-time-picker .ant-picker {
+  border-radius: 6px;
+}
+
+/* Custom upload styles */
+.custom-upload .ant-upload-drag {
+  border-radius: 8px;
+}
+
+/* Custom rate styles */
+.custom-rate .ant-rate-star {
+  margin-right: 4px;
+}
+
+/* Custom slider styles */
+.custom-slider .ant-slider-track {
+  background-color: #1890ff;
+}
+
+/* Custom switch styles */
+.custom-switch .ant-switch {
+  border-radius: 12px;
+}
+
+/* Custom checkbox styles */
+.custom-checkbox .ant-checkbox-inner {
+  border-radius: 4px;
+}
+
+/* Custom radio styles */
+.custom-radio .ant-radio-inner {
+  border-radius: 50%;
+}
+
+/* Custom transfer styles */
+.custom-transfer .ant-transfer-list {
+  border-radius: 8px;
+}
+
+/* Custom tree styles */
+.custom-tree .ant-tree-node-content-wrapper {
+  border-radius: 4px;
+}
+
+/* Custom collapse styles */
+.custom-collapse .ant-collapse-item {
+  border-radius: 8px;
+}
+
+/* Custom panel styles */
+.custom-panel .ant-collapse-content {
+  border-radius: 0 0 8px 8px;
+}
+
+/* Custom drawer styles */
+.custom-drawer .ant-drawer-content {
+  border-radius: 8px 0 0 8px;
+}
+
+/* Custom skeleton styles */
+.custom-skeleton .ant-skeleton-element {
+  border-radius: 4px;
+}
+
+/* Custom spin styles */
+.custom-spin .ant-spin-dot {
+  border-radius: 50%;
+}
+
+/* Custom result styles */
+.custom-result .ant-result-icon {
+  border-radius: 50%;
+}
+
+/* Custom empty styles */
+.custom-empty .ant-empty-image {
+  border-radius: 8px;
+}
+
+/* Custom statistic styles */
+.custom-statistic .ant-statistic-title {
+  color: #8c8c8c;
+}
+
+/* Custom timeline styles */
+.custom-timeline .ant-timeline-item-head {
+  border-radius: 50%;
+}
+
+/* Custom anchor styles */
+.custom-anchor .ant-anchor-link-title {
+  border-radius: 4px;
+}
+
+/* Custom back-top styles */
+.custom-back-top .ant-back-top-content {
+  border-radius: 50%;
+}
+
+/* Custom affix styles */
+.custom-affix .ant-affix {
+  border-radius: 8px;
+}
+
+/* Custom anchor styles */
+.custom-anchor .ant-anchor-ink {
+  border-radius: 2px;
+}
+
+/* Custom breadcrumb styles */
+.custom-breadcrumb .ant-breadcrumb-link {
+  border-radius: 4px;
+}
+
+/* Custom page-header styles */
+.custom-page-header .ant-page-header-heading {
+  border-radius: 8px;
+}
+
+/* Custom list styles */
+.custom-list .ant-list-item {
+  border-radius: 8px;
+}
+
+/* Custom avatar styles */
+.custom-avatar .ant-avatar {
+  border-radius: 50%;
+}
+
+/* Custom badge styles */
+.custom-badge .ant-badge-count {
+  border-radius: 10px;
+}
+
+/* Custom calendar styles */
+.custom-calendar .ant-picker-calendar {
+  border-radius: 8px;
+}
+
+/* Custom carousel styles */
+.custom-carousel .ant-carousel .slick-dots li button {
+  border-radius: 50%;
+}
+
+/* Custom cascader styles */
+.custom-cascader .ant-cascader-picker {
+  border-radius: 6px;
+}
+
+/* Custom color picker styles */
+.custom-color-picker .ant-color-picker-trigger {
+  border-radius: 6px;
+}
+
+/* Custom divider styles */
+.custom-divider .ant-divider {
+  border-radius: 1px;
+}
+
+/* Custom image styles */
+.custom-image .ant-image {
+  border-radius: 8px;
+}
+
+/* Custom mentions styles */
+.custom-mentions .ant-mentions-editor {
+  border-radius: 6px;
+}
+
+/* Custom notification styles */
+.custom-notification .ant-notification-notice-message {
+  border-radius: 4px;
+}
+
+/* Custom popconfirm styles */
+.custom-popconfirm .ant-popover-inner {
+  border-radius: 8px;
+}
+
+/* Custom popover styles */
+.custom-popover .ant-popover-inner {
+  border-radius: 8px;
+}
+
+/* Custom progress styles */
+.custom-progress .ant-progress-circle .ant-progress-text {
+  border-radius: 50%;
+}
+
+/* Custom radio group styles */
+.custom-radio-group .ant-radio-group {
+  border-radius: 6px;
+}
+
+/* Custom rate styles */
+.custom-rate .ant-rate-star-first,
+.custom-rate .ant-rate-star-second {
+  border-radius: 2px;
+}
+
+/* Custom select styles */
+.custom-select .ant-select-selection-item {
+  border-radius: 4px;
+}
+
+/* Custom slider styles */
+.custom-slider .ant-slider-handle {
+  border-radius: 50%;
+}
+
+/* Custom switch styles */
+.custom-switch .ant-switch-handle {
+  border-radius: 50%;
+}
+
+/* Custom table styles */
+.custom-table .ant-table-tbody > tr > td {
+  border-radius: 4px;
+}
+
+/* Custom tabs styles */
+.custom-tabs .ant-tabs-tabpane {
+  border-radius: 0 0 8px 8px;
+}
+
+/* Custom tag styles */
+.custom-tag .ant-tag {
+  border-radius: 12px;
+}
+
+/* Custom time picker styles */
+.custom-time-picker .ant-picker-time-panel {
+  border-radius: 8px;
+}
+
+/* Custom transfer styles */
+.custom-transfer .ant-transfer-list-header {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Custom tree styles */
+.custom-tree .ant-tree-treenode {
+  border-radius: 4px;
+}
+
+/* Custom upload styles */
+.custom-upload .ant-upload-list-item {
+  border-radius: 8px;
+}
+
+/* Custom version styles */
+.custom-version .ant-version {
+  border-radius: 4px;
+}

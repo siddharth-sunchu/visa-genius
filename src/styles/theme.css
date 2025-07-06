@@ -1,0 +1,337 @@
+/* Visa Genius Color Scheme */
+:root {
+  --primary-color: #1890ff;
+  --primary-dark: #096dd9;
+  --primary-light: #40a9ff;
+  --accent-color: #fbbf24;
+  --accent-dark: #f59e0b;
+  --accent-light: #fcd34d;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --background-light: #f9fafb;
+  --background-white: #ffffff;
+  --border-color: #e5e7eb;
+  --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Step Process Animations */
+.step-card {
+  background: var(--background-white);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-light);
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-large);
+  border-color: var(--primary-color);
+}
+
+.step-card:hover::before {
+  transform: scaleX(1);
+}
+
+.step-card:hover .step-icon {
+  transform: scale(1.1) rotate(5deg);
+  color: var(--accent-color);
+}
+
+/* Horizontal Step Process */
+.step-horizontal {
+  display: flex;
+  align-items: center;
+  background: var(--background-white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-light);
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.step-horizontal::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.step-horizontal:hover {
+  transform: translateX(8px);
+  box-shadow: var(--shadow-large);
+  border-color: var(--primary-color);
+}
+
+.step-horizontal:hover::before {
+  transform: scaleY(1);
+}
+
+.step-horizontal:hover .step-icon {
+  transform: scale(1.1) rotate(5deg);
+  color: var(--accent-color);
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.step-horizontal .step-number {
+  margin-bottom: 0;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.step-card:hover .step-number,
+.step-horizontal:hover .step-number {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(24, 144, 255, 0.4);
+}
+
+.step-icon {
+  font-size: 32px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.step-horizontal .step-icon {
+  margin-bottom: 0;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  transition: color 0.3s ease;
+}
+
+.step-card:hover .step-title,
+.step-horizontal:hover .step-title {
+  color: var(--primary-color);
+}
+
+.step-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  transition: color 0.3s ease;
+}
+
+.step-card:hover .step-description,
+.step-horizontal:hover .step-description {
+  color: var(--text-primary);
+}
+
+/* Animation delays for staggered entrance */
+.step-card:nth-child(1) { animation: fadeInUp 0.6s ease-out 0.1s both; }
+.step-card:nth-child(2) { animation: fadeInUp 0.6s ease-out 0.2s both; }
+.step-card:nth-child(3) { animation: fadeInUp 0.6s ease-out 0.3s both; }
+.step-card:nth-child(4) { animation: fadeInUp 0.6s ease-out 0.4s both; }
+.step-card:nth-child(5) { animation: fadeInUp 0.6s ease-out 0.5s both; }
+
+.step-horizontal:nth-child(1) { animation: slideInLeft 0.6s ease-out 0.1s both; }
+.step-horizontal:nth-child(2) { animation: slideInLeft 0.6s ease-out 0.2s both; }
+.step-horizontal:nth-child(3) { animation: slideInLeft 0.6s ease-out 0.3s both; }
+.step-horizontal:nth-child(4) { animation: slideInLeft 0.6s ease-out 0.4s both; }
+.step-horizontal:nth-child(5) { animation: slideInLeft 0.6s ease-out 0.5s both; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .step-card {
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .step-number {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .step-icon {
+    font-size: 28px;
+  }
+  
+  .step-title {
+    font-size: 18px;
+  }
+}
+
+/* User Dropdown Styles */
+.user-dropdown-trigger {
+  position: relative;
+  z-index: 1000;
+}
+
+.user-dropdown-trigger:hover {
+  background-color: rgba(24, 144, 255, 0.05);
+}
+
+/* Ensure dropdown menu appears above other elements */
+.ant-dropdown {
+  z-index: 9999 !important;
+}
+
+.ant-dropdown-menu {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  min-width: 160px !important;
+}
+
+/* Fix dropdown positioning */
+.ant-dropdown-open {
+  z-index: 9999 !important;
+}
+
+/* Ensure header doesn't interfere with dropdown */
+.ant-layout-header {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Footer Social Links */
+.footer-social-link {
+  transition: all 0.3s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--primary-color) !important;
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  background: linear-gradient(135deg, var(--accent-dark), var(--accent-color));
+} 
