@@ -1,1 +1,25 @@
- 
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#1890ff"/>
+  
+  <!-- Brain with circuit patterns -->
+  <g transform="translate(128, 96)">
+    <!-- Brain outline -->
+    <path d="M128 64 C192 32, 256 32, 320 64 C352 96, 352 128, 320 160 C288 192, 224 192, 192 160 C160 128, 160 96, 192 64 C224 32, 256 32, 288 64" 
+          stroke="#fbbf24" stroke-width="24" fill="none" stroke-linecap="round"/>
+    
+    <!-- Circuit patterns -->
+    <path d="M96 96 L160 96 M224 96 L288 96 M128 128 L192 128 M256 128 L320 128" 
+          stroke="#fbbf24" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Visa card element -->
+    <rect x="64" y="192" width="192" height="128" rx="16" fill="#1890ff" stroke="#fbbf24" stroke-width="8"/>
+    <rect x="80" y="208" width="160" height="16" rx="8" fill="white" opacity="0.8"/>
+    <rect x="80" y="240" width="128" height="8" rx="4" fill="white" opacity="0.6"/>
+  </g>
+  
+  <!-- Genius sparkles -->
+  <circle cx="96" cy="96" r="16" fill="#fbbf24"/>
+  <circle cx="416" cy="128" r="12" fill="#fbbf24"/>
+  <circle cx="384" cy="384" r="10" fill="#fbbf24"/>
+</svg> 

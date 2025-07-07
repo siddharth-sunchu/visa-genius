@@ -15,8 +15,8 @@ const EB1ACriteriaStep: React.FC<EB1ACriteriaStepProps> = ({ onComplete }) => {
   const [criteriaData, setCriteriaData] = useState<EB1ACriteria[]>(
     EB1A_CRITERIA.map(criteria => ({
       id: criteria.id,
-      category: criteria.category,
-      title: criteria.title,
+      category: criteria.name,
+      title: criteria.name,
       description: criteria.description,
       isCompleted: false,
       evidence: [],
@@ -89,10 +89,10 @@ const EB1ACriteriaStep: React.FC<EB1ACriteriaStepProps> = ({ onComplete }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const completedCount = criteriaData.filter(c => c.isCompleted).length;
-      const requiredCount = EB1A_CRITERIA.filter(c => c.required).length;
+      const requiredCount = 3; // Minimum 3 criteria required for EB1A
       
       if (completedCount < requiredCount) {
-        message.warning(`Please complete at least ${requiredCount} required criteria sections.`);
+        message.warning(`Please complete at least ${requiredCount} criteria sections.`);
         return;
       }
       
@@ -162,9 +162,6 @@ const EB1ACriteriaStep: React.FC<EB1ACriteriaStepProps> = ({ onComplete }) => {
                   >
                     <Title level={5} style={{ margin: 0 }}>
                       {criteria.title}
-                      {EB1A_CRITERIA.find(c => c.id === criteria.id)?.required && (
-                        <Text type="danger" style={{ marginLeft: '4px' }}>*</Text>
-                      )}
                     </Title>
                   </Checkbox>
                   {criteria.isCompleted && (

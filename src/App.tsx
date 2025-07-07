@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider, message } from 'antd';
+import { Provider } from 'react-redux';
 import { AuthContext } from './contexts/AuthContext';
 import { useAuthProvider } from './hooks/useAuth';
+import { store } from './store';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -40,44 +42,44 @@ const App: React.FC = () => {
   });
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#1890ff',
-          borderRadius: 8,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-        },
-      }}
-    >
-      <AuthContext.Provider value={auth}>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={
-              <MainLayout>
-                <LandingPage />
-              </MainLayout>
-            } />
-            
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
+    <Provider store={store}>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#1890ff',
+            borderRadius: 8,
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          },
+        }}
+      >
+        <AuthContext.Provider value={auth}>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={
                 <MainLayout>
-                  <DashboardPage />
+                  <LandingPage />
                 </MainLayout>
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </AuthContext.Provider>
-    </ConfigProvider>
+              } />
+              
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </AuthContext.Provider>
+      </ConfigProvider>
+    </Provider>
   );
 };
 
