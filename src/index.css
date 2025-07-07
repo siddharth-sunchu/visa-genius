@@ -40,6 +40,13 @@ code {
   transition: all 0.2s ease-in-out;
 }
 
+/* Exclude dropdown elements from global transitions */
+.ant-dropdown,
+.ant-dropdown-menu,
+.ant-dropdown-menu-item {
+  transition: none !important;
+}
+
 /* Custom button hover effects */
 .ant-btn:hover {
   transform: translateY(-1px);

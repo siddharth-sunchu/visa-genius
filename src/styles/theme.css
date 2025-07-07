@@ -278,6 +278,17 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   border-radius: 8px !important;
   min-width: 160px !important;
+  background: white !important;
+  border: 1px solid #d9d9d9 !important;
+}
+
+/* User dropdown overlay specific styles */
+.user-dropdown-overlay {
+  z-index: 9999 !important;
+}
+
+.user-dropdown-overlay .ant-dropdown-menu {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Fix dropdown positioning */
@@ -289,6 +300,31 @@
 .ant-layout-header {
   position: relative;
   z-index: 1000;
+  overflow: visible !important;
+}
+
+/* Specific dropdown menu styling */
+.ant-dropdown-menu-item {
+  padding: 8px 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-dropdown-menu-item:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+}
+
+.ant-dropdown-menu-item-icon {
+  margin-right: 8px !important;
+}
+
+/* Fix any overflow issues on parent containers */
+.ant-layout {
+  overflow: visible !important;
+}
+
+/* Additional dropdown styling */
+.ant-dropdown-menu {
+  padding: 8px 0 !important;
 }
 
 /* Footer Social Links */

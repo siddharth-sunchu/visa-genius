@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Button, Avatar, Dropdown, Space } from 'antd';
+import { Layout, Button, Avatar, Dropdown } from 'antd';
 import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,6 @@ const { Header: AntHeader } = Layout;
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  const menuItems: any[] = [];
 
   const userMenuItems = [
     {
@@ -63,7 +61,8 @@ const Header: React.FC = () => {
         justifyContent: 'space-between',
         height: '100%',
         maxWidth: 1200,
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative'
       }}>
         {/* Logo */}
         <div 
@@ -81,14 +80,18 @@ const Header: React.FC = () => {
         <div style={{ flex: 1 }} />
 
         {/* User Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', overflow: 'visible' }}>
           {user ? (
             <Dropdown
               menu={{ items: userMenuItems }}
               placement="bottomRight"
-              arrow
               trigger={['click']}
-              getPopupContainer={(triggerNode) => document.body}
+              overlayStyle={{ zIndex: 9999 }}
+              overlayClassName="user-dropdown-overlay"
+              align={{
+                offset: [0, 8], // x, y offset - small gap between header and dropdown
+              }}
+              getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
             >
               <div 
                 style={{ 
