@@ -34,8 +34,9 @@ import {
 } from '../store/slices/applicationSlice';
 import { APPLICATION_STEPS } from '../utils/constants';
 import PersonalInfoSubPage from '../components/PersonalInfoSubPage';
-import CriteriaSelectionForm from '../components/CriteriaSelectionForm';
+import CriteriaSelectionSubPage from '../components/CriteriaSelectionSubPage';
 import RecommendationLettersForm from '../components/RecommendationLettersForm';
+import PetitionLetterForm from '../components/PetitionLetterForm';
 import ChatInterface from '../components/ChatInterface';
 
 const { Sider, Content } = Layout;
@@ -44,11 +45,12 @@ const { Title, Text, Paragraph } = Typography;
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const dispatch = useAppDispatch();
-  const { currentPage, overallProgress, subsectionProgress } = useAppSelector(state => state.application);
+  const { overallProgress, subsectionProgress, questionnaireData } = useAppSelector(state => state.application);
   const { conversations } = useAppSelector((state: any) => state.chat);
   
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenuKey, setSelectedMenuKey] = useState('dashboard');
+  const [selectedProgressSection, setSelectedProgressSection] = useState<string>('personal_info');
 
   // Calculate progress based on completed subsections
   useEffect(() => {
@@ -63,6 +65,10 @@ const DashboardPage: React.FC = () => {
   const handleMenuClick = (key: string) => {
     setSelectedMenuKey(key);
     dispatch(setCurrentPage(key));
+  };
+
+  const handleProgressSectionClick = (sectionKey: string) => {
+    setSelectedProgressSection(sectionKey);
   };
 
   const menuItems = [
@@ -85,6 +91,11 @@ const DashboardPage: React.FC = () => {
       key: 'recommendation-letters',
       icon: <FileTextOutlined />,
       label: 'Recommendation Letters',
+    },
+    {
+      key: 'petition-letter',
+      icon: <FileTextOutlined />,
+      label: 'Petition Letter',
     },
     {
       key: 'questionnaire',
@@ -146,38 +157,565 @@ const DashboardPage: React.FC = () => {
 
       {/* Application Progress */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
-        <Title level={4} style={{ marginBottom: '16px' }}>
+        <Title level={4} style={{ marginBottom: '24px', textAlign: 'center' }}>
           Application Progress
         </Title>
-        <Row gutter={[16, 16]}>
-          {APPLICATION_STEPS.map((step, index) => (
-            <Col xs={24} sm={12} lg={6} key={step.key}>
-              <Card 
-                size="small" 
-                style={{ 
-                  textAlign: 'center',
-                  border: currentPage === step.key ? '2px solid #1890ff' : '1px solid #d9d9d9',
-                  borderRadius: '8px',
+        
+        {/* Progress Container */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: collapsed ? '16px' : '8px', 
+          padding: '20px 0',
+          overflowX: 'auto',
+          minHeight: collapsed ? '320px' : '280px'
+        }}>
+          {APPLICATION_STEPS.filter(step => step.key !== 'questionnaire').map((step, index) => {
+            // Calculate progress for each section
+            let sectionProgress = 0;
+            let sectionCompleted = false;
+            
+            switch (step.key) {
+              case 'personal_info':
+                const personalInfoCompleted = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
+                sectionProgress = (personalInfoCompleted / 8) * 100; // 8 subsections
+                sectionCompleted = sectionProgress === 100;
+                break;
+              case 'criteria_selection':
+                const criteriaData = questionnaireData.criteria_selection;
+                sectionProgress = criteriaData?.selectedCriteria?.length > 0 ? 100 : 0;
+                sectionCompleted = sectionProgress === 100;
+                break;
+              case 'documents':
+                const documentsData = questionnaireData.documents;
+                sectionProgress = documentsData?.uploadedFiles?.length > 0 ? 50 : 0;
+                sectionCompleted = sectionProgress === 100;
+                break;
+              case 'recommendation_letters':
+                const refsData = questionnaireData.recommendation_letters;
+                const refsCount = refsData?.references?.length || 0;
+                sectionProgress = refsCount >= 3 ? 100 : (refsCount / 3) * 100;
+                sectionCompleted = sectionProgress === 100;
+                break;
+              case 'petition_letter':
+                const petitionData = questionnaireData.petition_letter;
+                const petitionSections = ['introduction', 'qualifications', 'achievements', 'contributions', 'impact', 'future_plans', 'conclusion'];
+                const completedPetitionSections = petitionSections.filter(section => petitionData?.[section]).length;
+                sectionProgress = (completedPetitionSections / petitionSections.length) * 100;
+                sectionCompleted = sectionProgress === 100;
+                break;
+              case 'review':
+                const allSectionsComplete = APPLICATION_STEPS.filter(s => s.key !== 'questionnaire' && s.key !== 'review')
+                  .every(s => {
+                    if (s.key === 'personal_info') {
+                      return Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length === 8;
+                    }
+                    return questionnaireData[s.key] && Object.keys(questionnaireData[s.key]).length > 0;
+                  });
+                sectionProgress = allSectionsComplete ? 100 : 0;
+                sectionCompleted = sectionProgress === 100;
+                break;
+            }
+
+            const isSelected = selectedProgressSection === step.key;
+            const isCompleted = sectionCompleted;
+
+            return (
+              <div
+                key={step.key}
+                style={{
+                  minWidth: collapsed 
+                    ? (isSelected ? '320px' : '280px')
+                    : (isSelected ? '200px' : '160px'),
+                  maxWidth: collapsed 
+                    ? (isSelected ? '380px' : '340px')
+                    : (isSelected ? '240px' : '200px'),
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                   cursor: 'pointer',
+                  position: 'relative',
+                  padding: collapsed ? '8px' : '2px'
                 }}
-                onClick={() => handleMenuClick(step.key)}
+                onClick={() => handleProgressSectionClick(step.key)}
               >
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>
-                  {step.icon}
+                                  {/* Progress Card */}
+                  <div 
+                    style={{ 
+                      background: isSelected 
+                        ? 'linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%)' 
+                        : isCompleted 
+                          ? 'linear-gradient(135deg, #f6ffed 0%, #ffffff 100%)'
+                          : 'white',
+                      border: isSelected 
+                        ? '3px solid #1890ff' 
+                        : isCompleted 
+                          ? '2px solid #52c41a' 
+                          : '2px solid #e8e8e8',
+                      borderRadius: '16px',
+                      boxShadow: isSelected 
+                        ? '0 12px 40px rgba(24, 144, 255, 0.25), 0 4px 20px rgba(24, 144, 255, 0.15)' 
+                        : isCompleted 
+                          ? '0 8px 25px rgba(82, 196, 26, 0.2), 0 4px 15px rgba(82, 196, 26, 0.1)'
+                          : '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.05)',
+                      padding: collapsed 
+                        ? (isSelected ? '32px 28px' : '28px 24px')
+                        : (isSelected ? '24px 20px' : '20px 16px'),
+                      height: collapsed 
+                        ? (isSelected ? '300px' : '260px')
+                        : (isSelected ? '240px' : '200px'),
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                  {/* Shine effect for selected card */}
+                  {isSelected && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent)',
+                      animation: 'shine 3s infinite',
+                      zIndex: 1
+                    }} />
+                  )}
+
+                  {/* Progress bar at top */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '6px',
+                    background: `linear-gradient(90deg, ${isCompleted ? '#52c41a' : '#1890ff'} ${sectionProgress}%, #f0f0f0 ${sectionProgress}%)`,
+                    borderRadius: '0 0 3px 3px',
+                    zIndex: 2
+                  }} />
+                  
+                                      {/* Step number badge */}
+                    <div style={{
+                      position: 'absolute',
+                      top: collapsed ? '16px' : '8px',
+                      right: collapsed ? '16px' : '8px',
+                      width: collapsed 
+                        ? (isSelected ? '36px' : '32px')
+                        : (isSelected ? '24px' : '20px'),
+                      height: collapsed 
+                        ? (isSelected ? '36px' : '32px')
+                        : (isSelected ? '24px' : '20px'),
+                      borderRadius: '50%',
+                      background: isCompleted 
+                        ? 'linear-gradient(135deg, #52c41a, #73d13d)' 
+                        : isSelected 
+                          ? 'linear-gradient(135deg, #1890ff, #40a9ff)'
+                          : '#f0f0f0',
+                      color: 'white',
+                      fontSize: collapsed 
+                        ? (isSelected ? '18px' : '16px')
+                        : (isSelected ? '12px' : '10px'),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                      boxShadow: isSelected 
+                        ? '0 4px 12px rgba(24, 144, 255, 0.4)' 
+                        : isCompleted 
+                          ? '0 4px 12px rgba(82, 196, 26, 0.4)'
+                          : 'none',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      zIndex: 3
+                    }}>
+                      {step.order}
+                    </div>
+
+                  {/* Content Container */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    justifyContent: 'space-between',
+                    zIndex: 3,
+                    position: 'relative'
+                  }}>
+                    {/* Top Section - Icon and Title */}
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ 
+                        fontSize: collapsed 
+                          ? (isSelected ? '48px' : '40px')
+                          : (isSelected ? '28px' : '24px'), 
+                        marginBottom: collapsed 
+                          ? (isSelected ? '20px' : '16px')
+                          : (isSelected ? '10px' : '8px'),
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        {step.icon}
+                      </div>
+                      
+                      <Text strong style={{ 
+                        fontSize: collapsed 
+                          ? (isSelected ? '22px' : '18px')
+                          : (isSelected ? '14px' : '12px'),
+                        display: 'block',
+                        marginBottom: collapsed 
+                          ? (isSelected ? '16px' : '12px')
+                          : (isSelected ? '8px' : '6px'),
+                        color: isSelected ? '#1890ff' : '#262626',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        {step.title}
+                      </Text>
+                      
+                      <Text type="secondary" style={{ 
+                        fontSize: collapsed 
+                          ? (isSelected ? '16px' : '14px')
+                          : (isSelected ? '10px' : '9px'),
+                        lineHeight: '1.4',
+                        display: '-webkit-box',
+                        WebkitLineClamp: collapsed ? (isSelected ? 5 : 4) : (isSelected ? 3 : 2),
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        {step.description}
+                      </Text>
+                    </div>
+
+                    {/* Bottom Section - Progress */}
+                    <div style={{ textAlign: 'center' }}>
+                      {/* Horizontal Progress Bar */}
+                      <div style={{
+                        marginBottom: collapsed ? '24px' : '12px'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '6px'
+                        }}>
+                          <Text style={{ 
+                            fontSize: collapsed 
+                              ? (isSelected ? '16px' : '14px')
+                              : (isSelected ? '11px' : '10px'),
+                            fontWeight: '500',
+                            color: isCompleted ? '#52c41a' : isSelected ? '#1890ff' : '#8c8c8c',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}>
+                            Progress
+                          </Text>
+                          <Text style={{ 
+                            fontSize: collapsed 
+                              ? (isSelected ? '16px' : '14px')
+                              : (isSelected ? '11px' : '10px'),
+                            fontWeight: 'bold',
+                            color: isCompleted ? '#52c41a' : '#1890ff',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}>
+                            {Math.round(sectionProgress)}%
+                          </Text>
+                        </div>
+                        
+                        <Progress 
+                          percent={Math.round(sectionProgress)} 
+                          size={collapsed ? 'default' : 'small'}
+                          strokeColor={isCompleted ? "#52c41a" : "#1890ff"}
+                          strokeWidth={collapsed ? 8 : 4}
+                          showInfo={false}
+                          style={{
+                            marginBottom: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Status Text */}
+                      <Text style={{ 
+                        fontSize: collapsed 
+                          ? (isSelected ? '14px' : '12px')
+                          : (isSelected ? '10px' : '9px'),
+                        fontWeight: '500',
+                        color: isCompleted ? '#52c41a' : isSelected ? '#1890ff' : '#8c8c8c',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        {isCompleted ? 'Completed' : Math.round(sectionProgress) > 0 ? 'In Progress' : 'Not Started'}
+                      </Text>
+                    </div>
+                  </div>
+
+
                 </div>
-                <Text strong style={{ fontSize: '14px' }}>
-                  {step.title}
-                </Text>
-                <div style={{ marginTop: '4px' }}>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
-                    {step.description}
-                  </Text>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* CSS Animation for shine effect */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes shine {
+              0% { left: -100%; }
+              100% { left: 100%; }
+            }
+          `
+        }} />
       </Card>
+
+      {/* Detailed Progress Sections */}
+      {selectedProgressSection === 'criteria_selection' && (
+        <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
+          <Title level={4} style={{ marginBottom: '16px' }}>
+            EB1A Criteria Selection Progress
+          </Title>
+          <Paragraph type="secondary" style={{ marginBottom: '24px' }}>
+            Track your progress through each EB1A criteria category.
+          </Paragraph>
+          <Row gutter={[16, 16]}>
+            {[
+              { id: 'extraordinary_ability', name: 'Extraordinary Ability', icon: '⭐', description: 'Demonstrated extraordinary ability in sciences, arts, education, business, or athletics' },
+              { id: 'national_international_recognition', name: 'National/International Recognition', icon: '🏆', description: 'Sustained national or international acclaim' },
+              { id: 'major_contributions', name: 'Major Contributions', icon: '💡', description: 'Major contributions to the field' },
+              { id: 'authorship', name: 'Authorship', icon: '📚', description: 'Authorship of scholarly articles in professional journals' },
+              { id: 'judging', name: 'Judging', icon: '⚖️', description: 'Judging the work of others in the field' },
+              { id: 'original_contributions', name: 'Original Contributions', icon: '🔬', description: 'Original scientific, scholarly, artistic, or business contributions' },
+              { id: 'exhibitions', name: 'Exhibitions', icon: '🎨', description: 'Artistic exhibitions or showcases' },
+              { id: 'leading_role', name: 'Leading Role', icon: '👑', description: 'Leading or critical role in distinguished organizations' },
+              { id: 'high_salary', name: 'High Salary', icon: '💰', description: 'High salary or remuneration for services' },
+              { id: 'commercial_success', name: 'Commercial Success', icon: '📈', description: 'Commercial success in performing arts' },
+              { id: 'awards', name: 'Awards & Honors', icon: '🏅', description: 'Awards and honors for excellence' }
+            ].map((criteria) => {
+              const criteriaData = questionnaireData.criteria_selection?.[criteria.id];
+              const isCompleted = criteriaData && Object.keys(criteriaData).length > 0;
+              const progressPercentage = isCompleted ? 100 : 0;
+              
+              return (
+                <Col xs={24} sm={12} lg={6} key={criteria.id}>
+                  <Card
+                    style={{
+                      textAlign: 'center',
+                      border: isCompleted ? '2px solid #52c41a' : '1px solid #d9d9d9',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      handleMenuClick('criteria-selection');
+                      // You can add logic here to navigate to specific criteria
+                    }}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>
+                      {criteria.icon}
+                    </div>
+                    <Text strong style={{ fontSize: '14px', display: 'block', marginBottom: '4px' }}>
+                      {criteria.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: '8px' }}>
+                      {criteria.description}
+                    </Text>
+                    <div style={{ marginBottom: '8px' }}>
+                      <Progress 
+                        percent={progressPercentage} 
+                        size="small" 
+                        showInfo={false}
+                        strokeColor={isCompleted ? "#52c41a" : "#1890ff"}
+                      />
+                    </div>
+                    <div>
+                      {isCompleted ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          Completed
+                        </Tag>
+                      ) : (
+                        <Tag color="default" icon={<ClockCircleOutlined />}>
+                          Pending
+                        </Tag>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+      )}
+
+      {selectedProgressSection === 'documents' && (
+        <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
+          <Title level={4} style={{ marginBottom: '16px' }}>
+            Document Upload Progress
+          </Title>
+          <Paragraph type="secondary" style={{ marginBottom: '24px' }}>
+            Track your document upload progress.
+          </Paragraph>
+          <Row gutter={[16, 16]}>
+            {[
+              { id: 'passport', name: 'Passport', icon: '📖', description: 'Valid passport copy' },
+              { id: 'birth_certificate', name: 'Birth Certificate', icon: '📄', description: 'Birth certificate or equivalent' },
+              { id: 'educational_documents', name: 'Educational Documents', icon: '🎓', description: 'Degrees, diplomas, certificates' },
+              { id: 'employment_letters', name: 'Employment Letters', icon: '💼', description: 'Employment verification letters' },
+              { id: 'awards_certificates', name: 'Awards & Certificates', icon: '🏆', description: 'Awards, honors, and recognition certificates' },
+              { id: 'publications', name: 'Publications', icon: '📚', description: 'Published articles, papers, books' },
+              { id: 'media_coverage', name: 'Media Coverage', icon: '📰', description: 'Media articles and coverage' },
+              { id: 'financial_documents', name: 'Financial Documents', icon: '💰', description: 'Salary statements, tax returns' }
+            ].map((doc) => {
+              const documentsData = questionnaireData.documents?.uploadedFiles || [];
+              const isUploaded = documentsData.some((file: any) => file.category === doc.id);
+              
+              return (
+                <Col xs={24} sm={12} lg={6} key={doc.id}>
+                  <Card
+                    style={{
+                      textAlign: 'center',
+                      border: isUploaded ? '2px solid #52c41a' : '1px solid #d9d9d9',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleMenuClick('documents')}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>
+                      {doc.icon}
+                    </div>
+                    <Text strong style={{ fontSize: '14px', display: 'block', marginBottom: '4px' }}>
+                      {doc.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: '8px' }}>
+                      {doc.description}
+                    </Text>
+                    <div>
+                      {isUploaded ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          Uploaded
+                        </Tag>
+                      ) : (
+                        <Tag color="default" icon={<ClockCircleOutlined />}>
+                          Pending
+                        </Tag>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+      )}
+
+      {selectedProgressSection === 'recommendation_letters' && (
+        <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
+          <Title level={4} style={{ marginBottom: '16px' }}>
+            Recommendation Letters Progress
+          </Title>
+          <Paragraph type="secondary" style={{ marginBottom: '24px' }}>
+            Track your recommendation letters and references.
+          </Paragraph>
+          <Row gutter={[16, 16]}>
+            {[
+              { id: 'academic_references', name: 'Academic References', icon: '🎓', description: 'Professors, researchers, academic supervisors' },
+              { id: 'professional_references', name: 'Professional References', icon: '💼', description: 'Employers, colleagues, industry leaders' },
+              { id: 'industry_references', name: 'Industry References', icon: '🏢', description: 'Industry partners, clients, collaborators' },
+              { id: 'award_references', name: 'Award References', icon: '🏆', description: 'Award committees, recognition bodies' }
+            ].map((refType) => {
+              const refsData = questionnaireData.recommendation_letters?.references || [];
+              const refsInCategory = refsData.filter((ref: any) => ref.recommendationType === refType.id);
+              const isCompleted = refsInCategory.length >= 1;
+              
+              return (
+                <Col xs={24} sm={12} lg={6} key={refType.id}>
+                  <Card
+                    style={{
+                      textAlign: 'center',
+                      border: isCompleted ? '2px solid #52c41a' : '1px solid #d9d9d9',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleMenuClick('recommendation-letters')}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>
+                      {refType.icon}
+                    </div>
+                    <Text strong style={{ fontSize: '14px', display: 'block', marginBottom: '4px' }}>
+                      {refType.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: '8px' }}>
+                      {refType.description}
+                    </Text>
+                    <div>
+                      {isCompleted ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          {refsInCategory.length} Reference{refsInCategory.length > 1 ? 's' : ''}
+                        </Tag>
+                      ) : (
+                        <Tag color="default" icon={<ClockCircleOutlined />}>
+                          No References
+                        </Tag>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+      )}
+
+      {selectedProgressSection === 'petition_letter' && (
+        <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
+          <Title level={4} style={{ marginBottom: '16px' }}>
+            Petition Letter Progress
+          </Title>
+          <Paragraph type="secondary" style={{ marginBottom: '24px' }}>
+            Track your petition letter completion progress.
+          </Paragraph>
+          <Row gutter={[16, 16]}>
+            {[
+              { id: 'introduction', name: 'Introduction', icon: '📝', description: 'Personal introduction and background' },
+              { id: 'qualifications', name: 'Qualifications', icon: '🎓', description: 'Academic and professional qualifications' },
+              { id: 'achievements', name: 'Achievements', icon: '🏆', description: 'Key accomplishments and recognitions' },
+              { id: 'contributions', name: 'Contributions', icon: '💡', description: 'Significant contributions to the field' },
+              { id: 'impact', name: 'Impact', icon: '📈', description: 'Demonstrated impact on the field' },
+              { id: 'future_plans', name: 'Future Plans', icon: '🔮', description: 'Plans for continued contributions in the US' },
+              { id: 'conclusion', name: 'Conclusion', icon: '✅', description: 'Summary and request for approval' }
+            ].map((section) => {
+              const petitionData = questionnaireData.petition_letter || {};
+              const isCompleted = !!petitionData[section.id];
+              
+              return (
+                <Col xs={24} sm={12} lg={6} key={section.id}>
+                  <Card
+                    style={{
+                      textAlign: 'center',
+                      border: isCompleted ? '2px solid #52c41a' : '1px solid #d9d9d9',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleMenuClick('petition-letter')}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>
+                      {section.icon}
+                    </div>
+                    <Text strong style={{ fontSize: '14px', display: 'block', marginBottom: '4px' }}>
+                      {section.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: '8px' }}>
+                      {section.description}
+                    </Text>
+                    <div>
+                      {isCompleted ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          Completed
+                        </Tag>
+                      ) : (
+                        <Tag color="default" icon={<ClockCircleOutlined />}>
+                          Pending
+                        </Tag>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+      )}
 
       {/* Personal Information Progress */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
@@ -253,10 +791,28 @@ const DashboardPage: React.FC = () => {
               icon: <UserOutlined style={{ color: '#52c41a' }} />
             },
             {
+              title: 'EB1A Criteria Selection',
+              description: `${questionnaireData.criteria_selection?.selectedCriteria?.length || 0} criteria selected`,
+              time: 'Recently',
+              icon: <TrophyOutlined style={{ color: '#faad14' }} />
+            },
+            {
+              title: 'Document Upload',
+              description: `${questionnaireData.documents?.uploadedFiles?.length || 0} documents uploaded`,
+              time: 'Recently',
+              icon: <BookOutlined style={{ color: '#1890ff' }} />
+            },
+            {
               title: 'Recommendation Letters',
-              description: `${subsectionProgress.recommendation_letters?.references ? 'References added' : 'No references added yet'}`,
+              description: `${questionnaireData.recommendation_letters?.references?.length || 0} references added`,
               time: 'Recently',
               icon: <FileTextOutlined style={{ color: '#1890ff' }} />
+            },
+            {
+              title: 'Petition Letter',
+              description: `${Object.keys(questionnaireData.petition_letter || {}).length} of 7 sections completed`,
+              time: 'Recently',
+              icon: <FileTextOutlined style={{ color: '#52c41a' }} />
             },
             {
               title: 'Application Started',
@@ -291,11 +847,15 @@ const DashboardPage: React.FC = () => {
   );
 
   const renderCriteriaSelection = () => (
-    <CriteriaSelectionForm />
+    <CriteriaSelectionSubPage />
   );
 
   const renderRecommendationLetters = () => (
     <RecommendationLettersForm />
+  );
+
+  const renderPetitionLetter = () => (
+    <PetitionLetterForm />
   );
 
   const renderQuestionnaire = () => (
@@ -351,6 +911,8 @@ const DashboardPage: React.FC = () => {
         return renderCriteriaSelection();
       case 'recommendation-letters':
         return renderRecommendationLetters();
+      case 'petition-letter':
+        return renderPetitionLetter();
       case 'questionnaire':
         return renderQuestionnaire();
       case 'documents':

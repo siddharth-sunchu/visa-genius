@@ -246,37 +246,43 @@ export const APPLICATION_STEPS = [
     title: 'Personal Information',
     description: 'Complete your basic information and background',
     icon: '👤',
-    key: 'personal_info'
+    key: 'personal_info',
+    order: 1
   },
   {
     title: 'EB1A Criteria Selection',
     description: 'Select the criteria you qualify for',
     icon: '🎯',
-    key: 'criteria_selection'
-  },
-  {
-    title: 'Recommendation Letters',
-    description: 'Add references and generate recommendation letters',
-    icon: '📄',
-    key: 'recommendation_letters'
-  },
-  {
-    title: 'Questionnaire',
-    description: 'Complete detailed questionnaires for selected criteria',
-    icon: '📝',
-    key: 'questionnaire'
+    key: 'criteria_selection',
+    order: 2
   },
   {
     title: 'Document Upload',
     description: 'Upload supporting documents',
     icon: '📎',
-    key: 'documents'
+    key: 'documents',
+    order: 3
+  },
+  {
+    title: 'Recommendation Letters',
+    description: 'Add references and generate recommendation letters',
+    icon: '📄',
+    key: 'recommendation_letters',
+    order: 4
+  },
+  {
+    title: 'Petition Letter',
+    description: 'Generate and customize your petition letter',
+    icon: '📝',
+    key: 'petition_letter',
+    order: 5
   },
   {
     title: 'Review & Submit',
     description: 'Review and submit your application',
     icon: '✅',
-    key: 'review'
+    key: 'review',
+    order: 6
   }
 ];
 
