@@ -164,12 +164,12 @@ const DashboardPage: React.FC = () => {
         {/* Progress Container */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          gap: collapsed ? '16px' : '8px', 
+          gap: '12px', 
           padding: '20px 0',
-          overflowX: 'auto',
-          minHeight: collapsed ? '320px' : '280px'
+          width: '100%',
+          minHeight: '320px'
         }}>
           {APPLICATION_STEPS.filter(step => step.key !== 'questionnaire').map((step, index) => {
             // Calculate progress for each section
@@ -221,21 +221,23 @@ const DashboardPage: React.FC = () => {
             const isSelected = selectedProgressSection === step.key;
             const isCompleted = sectionCompleted;
 
+            const totalSteps = APPLICATION_STEPS.filter(step => step.key !== 'questionnaire').length;
+            const gapTotal = (totalSteps - 1) * 12; // 12px gap between cards
+            const selectedCardExtraWidth = 40;
+            
+            // Calculate base width considering one card will be larger
+            const baseWidth = `calc((100% - ${gapTotal}px - ${selectedCardExtraWidth}px) / ${totalSteps})`;
+            const selectedWidth = `calc((100% - ${gapTotal}px - ${selectedCardExtraWidth}px) / ${totalSteps} + ${selectedCardExtraWidth}px)`;
+
             return (
               <div
                 key={step.key}
                 style={{
-                  minWidth: collapsed 
-                    ? (isSelected ? '320px' : '280px')
-                    : (isSelected ? '200px' : '160px'),
-                  maxWidth: collapsed 
-                    ? (isSelected ? '380px' : '340px')
-                    : (isSelected ? '240px' : '200px'),
+                  width: isSelected ? selectedWidth : baseWidth,
                   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                   cursor: 'pointer',
                   position: 'relative',
-                  padding: collapsed ? '8px' : '2px'
+                  flexShrink: 0
                 }}
                 onClick={() => handleProgressSectionClick(step.key)}
               >
@@ -258,12 +260,8 @@ const DashboardPage: React.FC = () => {
                         : isCompleted 
                           ? '0 8px 25px rgba(82, 196, 26, 0.2), 0 4px 15px rgba(82, 196, 26, 0.1)'
                           : '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.05)',
-                      padding: collapsed 
-                        ? (isSelected ? '32px 28px' : '28px 24px')
-                        : (isSelected ? '24px 20px' : '20px 16px'),
-                      height: collapsed 
-                        ? (isSelected ? '300px' : '260px')
-                        : (isSelected ? '240px' : '200px'),
+                      padding: isSelected ? '28px 20px' : '24px 16px',
+                      height: isSelected ? '300px' : '280px',
                       position: 'relative',
                       overflow: 'hidden',
                       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -298,14 +296,10 @@ const DashboardPage: React.FC = () => {
                                       {/* Step number badge */}
                     <div style={{
                       position: 'absolute',
-                      top: collapsed ? '16px' : '8px',
-                      right: collapsed ? '16px' : '8px',
-                      width: collapsed 
-                        ? (isSelected ? '36px' : '32px')
-                        : (isSelected ? '24px' : '20px'),
-                      height: collapsed 
-                        ? (isSelected ? '36px' : '32px')
-                        : (isSelected ? '24px' : '20px'),
+                      top: '12px',
+                      right: '12px',
+                      width: isSelected ? '32px' : '28px',
+                      height: isSelected ? '32px' : '28px',
                       borderRadius: '50%',
                       background: isCompleted 
                         ? 'linear-gradient(135deg, #52c41a, #73d13d)' 
@@ -313,9 +307,7 @@ const DashboardPage: React.FC = () => {
                           ? 'linear-gradient(135deg, #1890ff, #40a9ff)'
                           : '#f0f0f0',
                       color: 'white',
-                      fontSize: collapsed 
-                        ? (isSelected ? '18px' : '16px')
-                        : (isSelected ? '12px' : '10px'),
+                      fontSize: isSelected ? '16px' : '14px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -343,25 +335,17 @@ const DashboardPage: React.FC = () => {
                     {/* Top Section - Icon and Title */}
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ 
-                        fontSize: collapsed 
-                          ? (isSelected ? '48px' : '40px')
-                          : (isSelected ? '28px' : '24px'), 
-                        marginBottom: collapsed 
-                          ? (isSelected ? '20px' : '16px')
-                          : (isSelected ? '10px' : '8px'),
+                        fontSize: isSelected ? '42px' : '36px', 
+                        marginBottom: isSelected ? '16px' : '12px',
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
                         {step.icon}
                       </div>
                       
                       <Text strong style={{ 
-                        fontSize: collapsed 
-                          ? (isSelected ? '22px' : '18px')
-                          : (isSelected ? '14px' : '12px'),
+                        fontSize: isSelected ? '18px' : '16px',
                         display: 'block',
-                        marginBottom: collapsed 
-                          ? (isSelected ? '16px' : '12px')
-                          : (isSelected ? '8px' : '6px'),
+                        marginBottom: isSelected ? '12px' : '8px',
                         color: isSelected ? '#1890ff' : '#262626',
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
@@ -369,12 +353,10 @@ const DashboardPage: React.FC = () => {
                       </Text>
                       
                       <Text type="secondary" style={{ 
-                        fontSize: collapsed 
-                          ? (isSelected ? '16px' : '14px')
-                          : (isSelected ? '10px' : '9px'),
+                        fontSize: isSelected ? '14px' : '12px',
                         lineHeight: '1.4',
                         display: '-webkit-box',
-                        WebkitLineClamp: collapsed ? (isSelected ? 5 : 4) : (isSelected ? 3 : 2),
+                        WebkitLineClamp: isSelected ? 4 : 3,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -387,7 +369,7 @@ const DashboardPage: React.FC = () => {
                     <div style={{ textAlign: 'center' }}>
                       {/* Horizontal Progress Bar */}
                       <div style={{
-                        marginBottom: collapsed ? '24px' : '12px'
+                        marginBottom: '16px'
                       }}>
                         <div style={{
                           display: 'flex',
@@ -396,9 +378,7 @@ const DashboardPage: React.FC = () => {
                           marginBottom: '6px'
                         }}>
                           <Text style={{ 
-                            fontSize: collapsed 
-                              ? (isSelected ? '16px' : '14px')
-                              : (isSelected ? '11px' : '10px'),
+                            fontSize: isSelected ? '14px' : '12px',
                             fontWeight: '500',
                             color: isCompleted ? '#52c41a' : isSelected ? '#1890ff' : '#8c8c8c',
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -406,9 +386,7 @@ const DashboardPage: React.FC = () => {
                             Progress
                           </Text>
                           <Text style={{ 
-                            fontSize: collapsed 
-                              ? (isSelected ? '16px' : '14px')
-                              : (isSelected ? '11px' : '10px'),
+                            fontSize: isSelected ? '14px' : '12px',
                             fontWeight: 'bold',
                             color: isCompleted ? '#52c41a' : '#1890ff',
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
