@@ -181,16 +181,6 @@ const PersonalInfoSubPage: React.FC = () => {
 
   return (
     <div>
-      {/* Header */}
-      <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
-        <Title level={3}>
-          <UserOutlined style={{ marginRight: '8px' }} />
-          Personal Information
-        </Title>
-        <Text type="secondary">
-          Complete your personal information step by step. You can save each section and return later.
-        </Text>
-      </Card>
 
       {/* Progress Overview */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>

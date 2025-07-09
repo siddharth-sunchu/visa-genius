@@ -212,17 +212,6 @@ ${fullPetition}
 
   return (
     <div>
-      {/* Header */}
-      <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
-        <Title level={3}>
-          <FileTextOutlined style={{ marginRight: '8px' }} />
-          Petition Letter Generator
-        </Title>
-        <Text type="secondary">
-          Create a comprehensive petition letter for your EB1A application. 
-          Complete each section to build a compelling case for extraordinary ability.
-        </Text>
-      </Card>
 
       {/* Progress Overview */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>

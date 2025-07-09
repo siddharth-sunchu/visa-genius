@@ -18,7 +18,7 @@ const Header: React.FC = () => {
       label: 'Profile',
       onClick: () => {
         console.log('Profile clicked');
-        navigate('/dashboard/profile');
+        navigate('/settings');
       },
     },
     {
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
       label: 'Settings',
       onClick: () => {
         console.log('Settings clicked');
-        navigate('/dashboard/settings');
+        navigate('/settings');
       },
     },
     {
