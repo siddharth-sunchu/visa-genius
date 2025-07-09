@@ -186,17 +186,6 @@ ${reference.phone}`;
 
   return (
     <div>
-      {/* Header */}
-      <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
-        <Title level={3}>
-          <FileTextOutlined style={{ marginRight: '8px' }} />
-          Recommendation Letters
-        </Title>
-        <Text type="secondary">
-          Add references who can provide strong recommendation letters for your EB1A application. 
-          We recommend at least 3-5 references from different professional relationships.
-        </Text>
-      </Card>
 
       {/* Progress Overview */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>

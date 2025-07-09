@@ -167,17 +167,6 @@ const CriteriaSelectionSubPage: React.FC = () => {
 
   return (
     <div>
-      {/* Header */}
-      <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
-        <Title level={3}>
-          <TrophyOutlined style={{ marginRight: '8px' }} />
-          EB1A Criteria Selection
-        </Title>
-        <Text type="secondary">
-          Select and provide detailed information for the EB1A criteria you qualify for. 
-          You can navigate between criteria sections in any order.
-        </Text>
-      </Card>
 
       {/* Progress Overview */}
       <Card style={{ marginBottom: '24px', borderRadius: '12px' }}>
