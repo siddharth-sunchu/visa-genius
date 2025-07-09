@@ -72,7 +72,7 @@ code {
   min-height: 200px;
 }
 
-/* Responsive text */
+/* Mobile-only responsive design */
 @media (max-width: 768px) {
   h1 {
     font-size: 24px !important;
@@ -84,6 +84,86 @@ code {
   
   h3 {
     font-size: 18px !important;
+  }
+  
+  /* Mobile navigation */
+  .mobile-menu-button {
+    display: block;
+  }
+  
+  .desktop-actions {
+    display: none;
+  }
+  
+  /* Mobile layout utilities */
+  .mobile-dashboard-container {
+    padding: 16px;
+  }
+  
+  .mobile-card {
+    margin-bottom: 16px;
+    border-radius: 8px;
+  }
+  
+  .mobile-card .ant-card-body {
+    padding: 16px;
+  }
+  
+  /* Mobile form elements */
+  .mobile-form .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  .mobile-form .ant-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+  
+  .mobile-form .ant-input, 
+  .mobile-form .ant-select-selector, 
+  .mobile-form .ant-picker {
+    min-height: 44px;
+  }
+  
+  /* Show mobile header only on mobile */
+  .mobile-header {
+    display: flex !important;
+  }
+  
+  /* Hide desktop layout on mobile */
+  .ant-layout.ant-layout-has-sider {
+    display: none !important;
+  }
+  
+  /* Show mobile content on mobile */
+  .mobile-content {
+    display: block !important;
+  }
+}
+
+/* Desktop styles - keep original behavior */
+@media (min-width: 769px) {
+  .mobile-menu-button {
+    display: none;
+  }
+  
+  .desktop-actions {
+    display: flex;
+  }
+  
+  /* Hide mobile header on desktop */
+  .mobile-header {
+    display: none !important;
+  }
+  
+  /* Show desktop layout on desktop */
+  .ant-layout.ant-layout-has-sider {
+    display: block !important;
+  }
+  
+  /* Hide mobile content on desktop */
+  .mobile-content {
+    display: none !important;
   }
 }
 

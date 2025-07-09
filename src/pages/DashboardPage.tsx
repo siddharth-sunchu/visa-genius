@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { 
   Layout, 
   Menu, 
@@ -12,7 +13,9 @@ import {
   Badge,
   List,
   Tag,
-  Empty
+  Empty,
+  Drawer,
+  Button
 } from 'antd';
 import { 
   DashboardOutlined,
@@ -24,7 +27,8 @@ import {
   ClockCircleOutlined,
   TrophyOutlined,
   BookOutlined,
-  TeamOutlined
+  TeamOutlined,
+  MenuOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -48,9 +52,14 @@ const DashboardPage: React.FC = () => {
   const { overallProgress, subsectionProgress, questionnaireData } = useAppSelector(state => state.application);
   const { conversations } = useAppSelector((state: any) => state.chat);
   
+  // Responsive breakpoints
+  const isDesktop = useMediaQuery({ minWidth: 769 });
+  const isMobile = useMediaQuery({ maxWidth: 768 });
+  
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenuKey, setSelectedMenuKey] = useState('dashboard');
   const [selectedProgressSection, setSelectedProgressSection] = useState<string>('personal_info');
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Calculate progress based on completed subsections
   useEffect(() => {
@@ -65,7 +74,138 @@ const DashboardPage: React.FC = () => {
   const handleMenuClick = (key: string) => {
     setSelectedMenuKey(key);
     dispatch(setCurrentPage(key));
+    setMobileDrawerOpen(false); // Close mobile drawer when menu item is clicked
   };
+
+  // Mobile Dashboard Component
+  const MobileDashboard = () => (
+    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      {/* Mobile Header */}
+      <div style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: '#fff',
+        padding: '8px 16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+      }}>
+        <Button
+          type="text"
+          icon={<MenuOutlined />}
+          onClick={() => setMobileDrawerOpen(true)}
+          style={{ fontSize: '18px', color: '#1890ff' }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Avatar size={32} icon={<UserOutlined />} />
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+            {user?.name || 'User'}
+          </span>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        title="Dashboard Menu"
+        placement="left"
+        onClose={() => setMobileDrawerOpen(false)}
+        open={mobileDrawerOpen}
+        width={280}
+        bodyStyle={{ padding: 0 }}
+      >
+        <div style={{ 
+          padding: '16px', 
+          textAlign: 'center', 
+          borderBottom: '1px solid #f0f0f0',
+          marginBottom: '16px'
+        }}>
+          <Avatar size={64} icon={<UserOutlined />} style={{ marginBottom: '8px' }} />
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+              {user?.name || 'User'}
+            </div>
+            <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
+              EB1A Applicant
+            </div>
+          </div>
+        </div>
+        
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedMenuKey]}
+          items={menuItems}
+          onClick={({ key }) => handleMenuClick(key)}
+          style={{ borderRight: 0 }}
+        />
+      </Drawer>
+
+      {/* Mobile Content */}
+      <div style={{ padding: '16px' }}>
+        {renderContent()}
+      </div>
+    </div>
+  );
+
+  // Desktop Dashboard Component
+  const DesktopDashboard = () => (
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider 
+        collapsible 
+        collapsed={collapsed} 
+        onCollapse={setCollapsed}
+        theme="light"
+        style={{
+          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          zIndex: 1000,
+        }}
+      >
+        <div style={{ 
+          padding: '16px', 
+          textAlign: 'center', 
+          borderBottom: '1px solid #f0f0f0',
+          marginBottom: '16px'
+        }}>
+          <Avatar 
+            size={collapsed ? 32 : 64} 
+            icon={<UserOutlined />} 
+            style={{ marginBottom: collapsed ? 0 : '8px' }}
+          />
+          {!collapsed && (
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {user?.name || 'User'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
+                EB1A Applicant
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedMenuKey]}
+          items={menuItems}
+          onClick={({ key }) => handleMenuClick(key)}
+          style={{ borderRight: 0 }}
+        />
+      </Sider>
+      
+      <Layout>
+        <Content style={{ 
+          margin: '24px', 
+          padding: '24px', 
+          background: '#f5f5f5',
+          borderRadius: '12px',
+          minHeight: 'calc(100vh - 48px)'
+        }}>
+          {renderContent()}
+        </Content>
+      </Layout>
+    </Layout>
+  );
 
   const handleProgressSectionClick = (sectionKey: string) => {
     setSelectedProgressSection(sectionKey);
@@ -905,17 +1045,90 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider 
-        collapsible 
-        collapsed={collapsed} 
-        onCollapse={setCollapsed}
-        theme="light"
-        style={{
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-        }}
+    <div>
+      {/* Mobile Header */}
+      <div className="mobile-header" style={{ 
+        display: 'none',
+        background: '#fff',
+        padding: '8px 16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <Button
+          type="text"
+          icon={<MenuOutlined />}
+          onClick={() => setMobileDrawerOpen(true)}
+          style={{ fontSize: '18px', color: '#1890ff' }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Avatar size={32} icon={<UserOutlined />} />
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+            {user?.name || 'User'}
+          </span>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        title="Dashboard Menu"
+        placement="left"
+        onClose={() => setMobileDrawerOpen(false)}
+        open={mobileDrawerOpen}
+        width={280}
+        bodyStyle={{ padding: 0 }}
       >
+        <div style={{ 
+          padding: '16px', 
+          textAlign: 'center', 
+          borderBottom: '1px solid #f0f0f0',
+          marginBottom: '16px'
+        }}>
+          <Avatar size={64} icon={<UserOutlined />} style={{ marginBottom: '8px' }} />
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+              {user?.name || 'User'}
+            </div>
+            <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
+              EB1A Applicant
+            </div>
+          </div>
+        </div>
+        
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedMenuKey]}
+          items={menuItems}
+          onClick={({ key }) => handleMenuClick(key)}
+          style={{ borderRight: 0 }}
+        />
+      </Drawer>
+
+      {/* Mobile Content */}
+      <div className="mobile-content" style={{ 
+        display: 'none',
+        background: '#f5f5f5',
+        minHeight: 'calc(100vh - 60px)',
+        padding: '16px'
+      }}>
+        {renderContent()}
+      </div>
+
+      {/* Desktop Layout */}
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider 
+          collapsible 
+          collapsed={collapsed} 
+          onCollapse={setCollapsed}
+          theme="light"
+          style={{
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+          }}
+        >
         <div style={{ 
           padding: '16px', 
           textAlign: 'center', 
@@ -961,6 +1174,7 @@ const DashboardPage: React.FC = () => {
         </Content>
       </Layout>
     </Layout>
+    </div>
   );
 };
 
