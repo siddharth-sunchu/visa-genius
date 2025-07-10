@@ -461,3 +461,8 @@ code {
 .custom-version .ant-version {
   border-radius: 4px;
 }
+
+/* Avoid layout-related transition flickers */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
