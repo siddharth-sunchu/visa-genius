@@ -4,12 +4,14 @@ import { UserOutlined, LockOutlined, GoogleOutlined, MailOutlined } from '@ant-d
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import VisaGeniusAtomTextLogo from '../components/VisaGeniusAtomTextLogo';
+import ErrorMessage from '../components/ErrorMessage';
 
 const { Title, Text } = Typography;
 
 const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -31,12 +33,15 @@ const RegisterPage: React.FC = () => {
     }
 
     setLoading(true);
+    setError(null);
     try {
       await register(values.email, values.password, values.name);
-      message.success('Registration successful! Welcome to Visa Genius!');
-      navigate('/dashboard');
-    } catch (error) {
-      message.error('Registration failed. Please try again.');
+      message.success('Registration successful! Please login to continue.');
+      navigate('/login');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -44,12 +49,15 @@ const RegisterPage: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    setError(null);
     try {
       await loginWithGoogle();
       message.success('Google registration successful!');
       navigate('/dashboard');
-    } catch (error) {
-      message.error('Google registration failed. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Google registration failed. Please try again.';
+      setError(errorMessage);
+      message.error(errorMessage);
     } finally {
       setGoogleLoading(false);
     }
@@ -93,6 +101,18 @@ const RegisterPage: React.FC = () => {
             Start your EB1A application journey today
           </Text>
         </div>
+
+        {error && (
+          <ErrorMessage
+            title="Registration Failed"
+            message={error}
+            showRetry={true}
+            onRetry={() => setError(null)}
+            retryText="Try Again"
+            closable={true}
+            onClose={() => setError(null)}
+          />
+        )}
 
         <Form
           name="register"

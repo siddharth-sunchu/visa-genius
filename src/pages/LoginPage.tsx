@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, Divider, Space, message } from 'antd';
-import { UserOutlined, LockOutlined, GoogleOutlined, MailOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
+import { LockOutlined, GoogleOutlined, MailOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import VisaGeniusAtomTextLogo from '../components/VisaGeniusAtomTextLogo';
+import ErrorMessage from '../components/ErrorMessage';
 
 const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
+    setError(null);
     try {
       await login(values.email, values.password);
       message.success('Login successful!');
       navigate('/dashboard');
-    } catch (error) {
-      message.error('Login failed. Please check your credentials.');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -28,12 +33,15 @@ const LoginPage: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    setError(null);
     try {
       await loginWithGoogle();
       message.success('Google login successful!');
       navigate('/dashboard');
-    } catch (error) {
-      message.error('Google login failed. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Google login failed. Please try again.';
+      setError(errorMessage);
+      message.error(errorMessage);
     } finally {
       setGoogleLoading(false);
     }
@@ -77,6 +85,18 @@ const LoginPage: React.FC = () => {
             Sign in to continue your EB1A application
           </Text>
         </div>
+
+        {error && (
+          <ErrorMessage
+            title="Login Failed"
+            message={error}
+            showRetry={true}
+            onRetry={() => setError(null)}
+            retryText="Try Again"
+            closable={true}
+            onClose={() => setError(null)}
+          />
+        )}
 
         <Form
           name="login"

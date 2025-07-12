@@ -3,6 +3,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 import { useState, useEffect } from 'react';
 import { User } from '../types';
+import { authService } from '../services/auth';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -12,46 +13,41 @@ export const useAuth = () => {
   return context;
 };
 
-
 export const useAuthProvider = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check for existing session
-    const savedUser = localStorage.getItem('visa-genius-user');
+    const savedUser = authService.getStoredUser();
     if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('visa-genius-user');
-      }
+      setUser({
+        ...savedUser,
+        isAuthenticated: true
+      });
     }
     setLoading(false);
   }, []);
 
   const saveUser = (userData: User) => {
-    localStorage.setItem('visa-genius-user', JSON.stringify(userData));
     setUser(userData);
   };
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authService.login({ email, password });
       
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
+      const authenticatedUser: User = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
         isAuthenticated: true
       };
       
-      saveUser(mockUser);
+      saveUser(authenticatedUser);
     } catch (error) {
-      throw new Error('Login failed');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -60,7 +56,7 @@ export const useAuthProvider = () => {
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
-      // Simulate Google OAuth
+      // Simulate Google OAuth - you can implement actual Google OAuth here
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const mockUser: User = {
@@ -81,27 +77,31 @@ export const useAuthProvider = () => {
   const register = async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authService.register({ email, password, name });
       
-      const mockUser: User = {
-        id: '1',
-        email,
-        name,
-        isAuthenticated: true
-      };
+      // Don't auto-login after registration, let them login manually
+      // This follows the common pattern where registration requires email verification
+      // or explicit login for security
       
-      saveUser(mockUser);
+      return response;
     } catch (error) {
-      throw new Error('Registration failed');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('visa-genius-user');
-    setUser(null);
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await authService.logout();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateProfile = async (profile: Partial<User['profile']>) => {
@@ -109,7 +109,7 @@ export const useAuthProvider = () => {
     
     setLoading(true);
     try {
-      // Simulate API call
+      // Simulate API call - implement actual profile update API
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const updatedUser: User = {

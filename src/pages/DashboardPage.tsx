@@ -9,7 +9,8 @@ import {
   Avatar,
   Badge,
   List,
-  Tag
+  Tag,
+  Spin
 } from 'antd';
 import { 
   UserOutlined,
@@ -26,16 +27,18 @@ import {
   updateOverallProgress 
 } from '../store/slices/applicationSlice';
 import { APPLICATION_STEPS } from '../utils/constants';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const { Title, Text, Paragraph } = Typography;
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const dispatch = useAppDispatch();
   const { overallProgress, subsectionProgress, questionnaireData } = useAppSelector(state => state.application);
   const { conversations } = useAppSelector((state: any) => state.chat);
   
   const [selectedProgressSection, setSelectedProgressSection] = useState<string>('personal_info');
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Calculate progress based on completed subsections
   useEffect(() => {
@@ -45,9 +48,37 @@ const DashboardPage: React.FC = () => {
     dispatch(updateOverallProgress(progress));
   }, [subsectionProgress, dispatch]);
 
+  // Simulate loading dashboard data
+  useEffect(() => {
+    if (user && !loading) {
+      // Simulate API call to load dashboard data
+      const loadDashboardData = async () => {
+        setDataLoading(true);
+        try {
+          // Simulate API delay
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setDataLoading(false);
+        } catch (error) {
+          console.error('Error loading dashboard data:', error);
+          setDataLoading(false);
+        }
+      };
+      loadDashboardData();
+    }
+  }, [user, loading]);
+
   const handleProgressSectionClick = (sectionKey: string) => {
     setSelectedProgressSection(sectionKey);
   };
+
+  // Show loading screen while authenticating or loading data
+  if (loading) {
+    return <LoadingSpinner fullScreen size="large" message="Authenticating..." />;
+  }
+
+  if (dataLoading) {
+    return <LoadingSpinner fullScreen size="large" message="Loading your dashboard..." />;
+  }
 
   return (
     <div>
