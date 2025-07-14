@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -12,7 +12,8 @@ import {
   Space,
   message,
   Collapse,
-  InputNumber
+  InputNumber,
+  Spin
 } from 'antd';
 import {
   UserOutlined,
@@ -27,6 +28,20 @@ import {
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { updateQuestionnaireData } from '../store/slices/applicationSlice';
+import {
+  fetchPersonalInfo,
+  updateBasicInfo,
+  updateCurrentStatus,
+  updateCurrentAddress,
+  updateFamilyLife,
+  updateSpouseInfo,
+  updateChildrenInfo,
+  updateImmigrationHistory,
+  updatePastUSVisits,
+  updateOccupation,
+  updateEmploymentHistory,
+  clearAllErrors
+} from '../store/slices/personalInfoSlice';
 
 
 const { Title, Text } = Typography;
@@ -37,17 +52,171 @@ const { Option } = Select;
 const PersonalInfoForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const { questionnaireData } = useAppSelector((state: any) => state.application);
+  const { data, loading, error, sectionLoading, sectionErrors } = useAppSelector((state: any) => state.personalInfo);
   const [form] = Form.useForm();
   const [activeKey, setActiveKey] = useState(['basic_info']);
 
-  const onFinish = (values: any) => {
-    dispatch(updateQuestionnaireData({ section: 'personal_info', data: values }));
-    message.success('Personal information saved successfully!');
+  // Load personal info on component mount
+  useEffect(() => {
+    dispatch(fetchPersonalInfo());
+    return () => {
+      dispatch(clearAllErrors());
+    };
+  }, [dispatch]);
+
+  // Update form when data changes
+  useEffect(() => {
+    if (data && Object.keys(data).length > 0) {
+      const formData = convertApiDataToFormData(data);
+      form.setFieldsValue(formData);
+    }
+  }, [data, form]);
+
+  // Helper function to convert API data to form data format
+  const convertApiDataToFormData = (apiData: any) => {
+    const formData: any = {};
+    
+    // Basic Info
+    if (apiData.basicInfo) {
+      formData.basicInfo = { ...apiData.basicInfo };
+    }
+
+    // Current Status
+    if (apiData.currentStatus) {
+      formData.currentStatus = { ...apiData.currentStatus };
+    }
+
+    // Other sections
+    formData.currentAddress = apiData.currentAddress || {};
+    formData.familyLife = apiData.familyLife || {};
+    formData.spouseInfo = apiData.spouseInfo || {};
+    formData.childrenInfo = apiData.childrenInfo || { children: [] };
+    formData.immigrationHistory = apiData.immigrationHistory || {};
+    formData.pastUSVisits = apiData.pastUSVisits || [];
+    formData.occupation = apiData.occupation || {};
+    formData.employmentHistory = apiData.employmentHistory || [];
+
+    return formData;
+  };
+
+  // Helper function to convert form data to API format
+  const convertFormDataToApiData = (formData: any) => {
+    return { ...formData };
+  };
+
+  const onFinish = async (values: any) => {
+    try {
+      const apiData = convertFormDataToApiData(values);
+      
+      // Save all sections to API
+      const savePromises = [];
+      
+      if (values.basicInfo) {
+        savePromises.push(dispatch(updateBasicInfo(apiData.basicInfo)).unwrap());
+      }
+      if (values.currentStatus) {
+        savePromises.push(dispatch(updateCurrentStatus(apiData.currentStatus)).unwrap());
+      }
+      if (values.currentAddress) {
+        savePromises.push(dispatch(updateCurrentAddress(apiData.currentAddress)).unwrap());
+      }
+      if (values.familyLife) {
+        savePromises.push(dispatch(updateFamilyLife(apiData.familyLife)).unwrap());
+      }
+      if (values.spouseInfo) {
+        savePromises.push(dispatch(updateSpouseInfo(apiData.spouseInfo)).unwrap());
+      }
+      if (values.childrenInfo) {
+        savePromises.push(dispatch(updateChildrenInfo(apiData.childrenInfo)).unwrap());
+      }
+      if (values.immigrationHistory) {
+        savePromises.push(dispatch(updateImmigrationHistory(apiData.immigrationHistory)).unwrap());
+      }
+      if (values.pastUSVisits) {
+        savePromises.push(dispatch(updatePastUSVisits(apiData.pastUSVisits)).unwrap());
+      }
+      if (values.occupation) {
+        savePromises.push(dispatch(updateOccupation(apiData.occupation)).unwrap());
+      }
+      if (values.employmentHistory) {
+        savePromises.push(dispatch(updateEmploymentHistory(apiData.employmentHistory)).unwrap());
+      }
+
+      await Promise.all(savePromises);
+      
+      // Also update legacy application slice for backward compatibility
+      dispatch(updateQuestionnaireData({ section: 'personal_info', data: values }));
+      
+      message.success('Personal information saved successfully!');
+    } catch (error: any) {
+      message.error(error.message || 'Failed to save personal information. Please try again.');
+    }
+  };
+
+  const handleSectionSave = async (section: string, sectionData: any) => {
+    try {
+      const apiData = convertFormDataToApiData({ [section]: sectionData });
+      
+      switch (section) {
+        case 'basicInfo':
+          await dispatch(updateBasicInfo(apiData.basicInfo)).unwrap();
+          break;
+        case 'currentStatus':
+          await dispatch(updateCurrentStatus(apiData.currentStatus)).unwrap();
+          break;
+        case 'currentAddress':
+          await dispatch(updateCurrentAddress(apiData.currentAddress)).unwrap();
+          break;
+        case 'familyLife':
+          await dispatch(updateFamilyLife(apiData.familyLife)).unwrap();
+          break;
+        case 'spouseInfo':
+          await dispatch(updateSpouseInfo(apiData.spouseInfo)).unwrap();
+          break;
+        case 'childrenInfo':
+          await dispatch(updateChildrenInfo(apiData.childrenInfo)).unwrap();
+          break;
+        case 'immigrationHistory':
+          await dispatch(updateImmigrationHistory(apiData.immigrationHistory)).unwrap();
+          break;
+        case 'pastUSVisits':
+          await dispatch(updatePastUSVisits(apiData.pastUSVisits)).unwrap();
+          break;
+        case 'occupation':
+          await dispatch(updateOccupation(apiData.occupation)).unwrap();
+          break;
+        case 'employmentHistory':
+          await dispatch(updateEmploymentHistory(apiData.employmentHistory)).unwrap();
+          break;
+        default:
+          throw new Error(`Unknown section: ${section}`);
+      }
+      
+      message.success(`${section} updated successfully!`);
+    } catch (error: any) {
+      message.error(error.message || `Failed to update ${section}`);
+    }
   };
 
   const handlePanelChange = (keys: string | string[]) => {
     setActiveKey(Array.isArray(keys) ? keys : [keys]);
   };
+
+  // Display errors if any
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+        <div style={{ marginTop: '16px' }}>Loading personal information...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -79,9 +248,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <UserOutlined />
                 <Text strong>Basic Information</Text>
+                {sectionErrors.basicInfo && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.basicInfo}
+                  </Text>
+                )}
               </Space>
             }
             key="basic_info"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.basicInfo}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const basicInfoData = form.getFieldValue('basicInfo');
+                  if (basicInfoData) {
+                    handleSectionSave('basicInfo', basicInfoData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -162,9 +352,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <GlobalOutlined />
                 <Text strong>Current Immigration Status</Text>
+                {sectionErrors.currentStatus && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.currentStatus}
+                  </Text>
+                )}
               </Space>
             }
             key="current_status"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.currentStatus}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentStatusData = form.getFieldValue('currentStatus');
+                  if (currentStatusData) {
+                    handleSectionSave('currentStatus', currentStatusData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -217,9 +428,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <HomeOutlined />
                 <Text strong>Current Home Address</Text>
+                {sectionErrors.currentAddress && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.currentAddress}
+                  </Text>
+                )}
               </Space>
             }
             key="current_address"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.currentAddress}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentAddressData = form.getFieldValue('currentAddress');
+                  if (currentAddressData) {
+                    handleSectionSave('currentAddress', currentAddressData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24}>
@@ -276,9 +508,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <HeartOutlined />
                 <Text strong>Family Life</Text>
+                {sectionErrors.familyLife && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.familyLife}
+                  </Text>
+                )}
               </Space>
             }
             key="family_life"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.familyLife}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const familyLifeData = form.getFieldValue('familyLife');
+                  if (familyLifeData) {
+                    handleSectionSave('familyLife', familyLifeData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -317,9 +570,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <UserOutlined />
                 <Text strong>Spouse Information</Text>
+                {sectionErrors.spouseInfo && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.spouseInfo}
+                  </Text>
+                )}
               </Space>
             }
             key="spouse_info"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.spouseInfo}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const spouseInfoData = form.getFieldValue('spouseInfo');
+                  if (spouseInfoData) {
+                    handleSectionSave('spouseInfo', spouseInfoData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -371,9 +645,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <HeartOutlined />
                 <Text strong>Children and Dependents</Text>
+                {sectionErrors.childrenInfo && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.childrenInfo}
+                  </Text>
+                )}
               </Space>
             }
             key="children_info"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.childrenInfo}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const childrenInfoData = form.getFieldValue('childrenInfo');
+                  if (childrenInfoData) {
+                    handleSectionSave('childrenInfo', childrenInfoData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Form.List name={['childrenInfo', 'children']}>
               {(fields, { add, remove }) => (
@@ -461,9 +756,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <GlobalOutlined />
                 <Text strong>Immigration History</Text>
+                {sectionErrors.immigrationHistory && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.immigrationHistory}
+                  </Text>
+                )}
               </Space>
             }
             key="immigration_history"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.immigrationHistory}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const immigrationHistoryData = form.getFieldValue('immigrationHistory');
+                  if (immigrationHistoryData) {
+                    handleSectionSave('immigrationHistory', immigrationHistoryData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24}>
@@ -499,9 +815,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <GlobalOutlined />
                 <Text strong>Past US Visits</Text>
+                {sectionErrors.pastUSVisits && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.pastUSVisits}
+                  </Text>
+                )}
               </Space>
             }
             key="past_us_visits"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.pastUSVisits}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const pastUSVisitsData = form.getFieldValue('pastUSVisits');
+                  if (pastUSVisitsData) {
+                    handleSectionSave('pastUSVisits', pastUSVisitsData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Form.List name="pastUSVisits">
               {(fields, { add, remove }) => (
@@ -581,9 +918,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <BankOutlined />
                 <Text strong>Occupation & Employment</Text>
+                {sectionErrors.occupation && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.occupation}
+                  </Text>
+                )}
               </Space>
             }
             key="occupation"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.occupation}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const occupationData = form.getFieldValue('occupation');
+                  if (occupationData) {
+                    handleSectionSave('occupation', occupationData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -645,9 +1003,30 @@ const PersonalInfoForm: React.FC = () => {
               <Space>
                 <FileTextOutlined />
                 <Text strong>Employment History</Text>
+                {sectionErrors.employmentHistory && (
+                  <Text type="danger" style={{ fontSize: '12px' }}>
+                    {sectionErrors.employmentHistory}
+                  </Text>
+                )}
               </Space>
             }
             key="employment_history"
+            extra={
+              <Button
+                type="link"
+                size="small"
+                loading={sectionLoading.employmentHistory}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const employmentHistoryData = form.getFieldValue('employmentHistory');
+                  if (employmentHistoryData) {
+                    handleSectionSave('employmentHistory', employmentHistoryData);
+                  }
+                }}
+              >
+                Save Section
+              </Button>
+            }
           >
             <Form.List name="employmentHistory">
               {(fields, { add, remove }) => (

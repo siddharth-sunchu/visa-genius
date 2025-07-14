@@ -26,6 +26,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { 
   updateOverallProgress 
 } from '../store/slices/applicationSlice';
+import { fetchPersonalInfo } from '../store/slices/personalInfoSlice';
 import { APPLICATION_STEPS } from '../utils/constants';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -35,18 +36,33 @@ const DashboardPage: React.FC = () => {
   const { user, loading } = useAuth();
   const dispatch = useAppDispatch();
   const { overallProgress, subsectionProgress, questionnaireData } = useAppSelector(state => state.application);
+  const { data: personalInfoData, progress: backendProgress } = useAppSelector((state: any) => state.personalInfo);
   const { conversations } = useAppSelector((state: any) => state.chat);
   
   const [selectedProgressSection, setSelectedProgressSection] = useState<string>('personal_info');
   const [dataLoading, setDataLoading] = useState(true);
 
-  // Calculate progress based on completed subsections
+  // Load personal info on mount
   useEffect(() => {
-    const personalInfoProgress = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
-    const totalPersonalInfoSections = 8; // Total subsections in personal info
-    const progress = (personalInfoProgress / totalPersonalInfoSections) * 100;
-    dispatch(updateOverallProgress(progress));
-  }, [subsectionProgress, dispatch]);
+    dispatch(fetchPersonalInfo());
+  }, [dispatch]);
+
+  // Calculate progress based on backend data first, then fallback to local progress
+  useEffect(() => {
+    let personalInfoProgress = 0;
+    const totalPersonalInfoSections = 8;
+
+    if (backendProgress?.completedSteps && backendProgress?.totalSteps) {
+      // Use backend progress
+      personalInfoProgress = (backendProgress.completedSteps / backendProgress.totalSteps) * 100;
+    } else {
+      // Fallback to local progress
+      const completedSections = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
+      personalInfoProgress = (completedSections / totalPersonalInfoSections) * 100;
+    }
+    
+    dispatch(updateOverallProgress(personalInfoProgress));
+  }, [subsectionProgress, backendProgress, dispatch]);
 
   // Simulate loading dashboard data
   useEffect(() => {
@@ -132,9 +148,16 @@ const DashboardPage: React.FC = () => {
             
             switch (step.key) {
               case 'personal_info':
-                const personalInfoCompleted = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
-                sectionProgress = (personalInfoCompleted / 8) * 100;
-                sectionCompleted = sectionProgress === 100;
+                if (backendProgress?.completedSteps && backendProgress?.totalSteps) {
+                  // Use backend progress
+                  sectionProgress = Math.round((backendProgress.completedSteps / backendProgress.totalSteps) * 100);
+                  sectionCompleted = backendProgress.completedSteps === backendProgress.totalSteps;
+                } else {
+                  // Fallback to local progress
+                  const personalInfoCompleted = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
+                  sectionProgress = (personalInfoCompleted / 8) * 100;
+                  sectionCompleted = sectionProgress === 100;
+                }
                 break;
               case 'criteria_selection':
                 const criteriaData = questionnaireData.criteria_selection?.selectedCriteria || [];
@@ -163,6 +186,9 @@ const DashboardPage: React.FC = () => {
                 const allSectionsComplete = APPLICATION_STEPS.filter(s => s.key !== 'questionnaire' && s.key !== 'review')
                   .every(s => {
                     if (s.key === 'personal_info') {
+                      if (backendProgress?.completedSteps && backendProgress?.totalSteps) {
+                        return backendProgress.completedSteps === backendProgress.totalSteps;
+                      }
                       return Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length === 8;
                     }
                     if (s.key === 'documents') {
@@ -379,11 +405,34 @@ const DashboardPage: React.FC = () => {
                     { id: 'current_address', name: 'Current Home Address', icon: '🏠', description: 'Residential address details' },
                     { id: 'family_life', name: 'Family Life', icon: '👨‍👩‍👧‍👦', description: 'Marital status and family information' },
                     { id: 'spouse_info', name: 'Spouse Information', icon: '💑', description: 'Detailed spouse information' },
-                    { id: 'education', name: 'Education Background', icon: '🎓', description: 'Academic qualifications and institutions' },
-                    { id: 'employment', name: 'Employment History', icon: '💼', description: 'Professional background and work history' },
-                    { id: 'contact_info', name: 'Contact Information', icon: '📞', description: 'Email, phone, and emergency contacts' }
+                    { id: 'children_info', name: 'Children Information', icon: '👶', description: 'Children and dependents details' },
+                    { id: 'immigration_history', name: 'Immigration History', icon: '📋', description: 'Previous immigration and travel history' },
+                    { id: 'occupation', name: 'Occupation & Employment', icon: '💼', description: 'Professional background and work history' }
                   ].map((section) => {
-                    const isCompleted = subsectionProgress.personal_info?.[section.id] || false;
+                    // Check backend progress first, then fallback to local progress
+                    let isCompleted = false;
+                    if (backendProgress?.completedSections) {
+                      // Map backend section names to frontend IDs
+                      const backendToFrontendMapping: Record<string, string> = {
+                        'basic_info': 'basic_info',
+                        'currentStatus': 'current_status', 
+                        'currentAddress': 'current_address',
+                        'familyLife': 'family_life',
+                        'spouseInfo': 'spouse_info',
+                        'childrenInfo': 'children_info',
+                        'immigrationHistory': 'immigration_history',
+                        'occupation': 'occupation'
+                      };
+                      
+                      // Check if any backend section maps to this frontend section
+                      const backendSectionKey = Object.keys(backendToFrontendMapping).find(
+                        key => backendToFrontendMapping[key] === section.id
+                      );
+                      isCompleted = backendSectionKey ? backendProgress.completedSections.includes(backendSectionKey) : false;
+                    } else {
+                      // Fallback to local progress
+                      isCompleted = subsectionProgress.personal_info?.[section.id] || false;
+                    }
                     return (
                       <Col xs={24} sm={12} lg={6} key={section.id}>
                         <Card
@@ -839,8 +888,14 @@ const DashboardPage: React.FC = () => {
                   
                   switch (step.key) {
                     case 'personal_info':
-                      isCompleted = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length === 8;
-                      progressText = `${Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length} of 8 sections completed`;
+                      if (backendProgress?.completedSteps && backendProgress?.totalSteps) {
+                        isCompleted = backendProgress.completedSteps === backendProgress.totalSteps;
+                        progressText = `${backendProgress.completedSteps} of ${backendProgress.totalSteps} sections completed`;
+                      } else {
+                        const localCompleted = Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length;
+                        isCompleted = localCompleted === 8;
+                        progressText = `${localCompleted} of 8 sections completed`;
+                      }
                       break;
                     case 'criteria_selection':
                       isCompleted = (questionnaireData.criteria_selection?.selectedCriteria?.length || 0) > 0;
@@ -898,7 +953,9 @@ const DashboardPage: React.FC = () => {
           dataSource={[
             {
               title: 'Personal Information Progress',
-              description: `${Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length} of 8 sections completed`,
+              description: backendProgress?.completedSteps && backendProgress?.totalSteps 
+                ? `${backendProgress.completedSteps} of ${backendProgress.totalSteps} sections completed`
+                : `${Object.values(subsectionProgress.personal_info || {}).filter(Boolean).length} of 8 sections completed`,
               time: 'Just now',
               icon: <UserOutlined style={{ color: '#52c41a' }} />
             },

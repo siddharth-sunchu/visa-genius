@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Row, Col, Typography, Card, Space, message } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { UserProfile } from '../../types';
+import usePersonalInfo from '../../hooks/usePersonalInfo';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -15,10 +16,25 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ onComplete }) => {
   const { user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { data, actions } = usePersonalInfo();
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue({
+        firstName: data.basicInfo?.firstName,
+        lastName: data.basicInfo?.lastName,
+        title: data.occupation?.jobTitle || '', // Map from occupation if available
+        institution: data.occupation?.currentEmployer || '',
+        field: data.occupation?.field || '',
+        bio: data.occupation?.jobDescription || '', // Use job description as bio
+      });
+    }
+  }, [data, form]);
 
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
+      // Save to both the old profile system and new personal info system
       const profile: Partial<UserProfile> = {
         firstName: values.firstName,
         lastName: values.lastName,
@@ -32,7 +48,25 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ onComplete }) => {
         memberships: values.memberships || []
       };
 
-      await updateProfile(profile);
+      // Save to personal info API (basic information and occupation)
+      const basicInfoData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+      };
+
+      const occupationData = {
+        jobTitle: values.title,
+        currentEmployer: values.institution,
+        field: values.field,
+        jobDescription: values.bio,
+      };
+
+      await Promise.all([
+        updateProfile(profile), // Legacy system
+        actions.updateBasicInfo(basicInfoData).unwrap(), // New system - basic info
+        actions.updateOccupation(occupationData).unwrap() // New system - occupation
+      ]);
+
       message.success('Personal information saved successfully!');
       onComplete();
     } catch (error) {

@@ -35,6 +35,11 @@ export const API_ENDPOINTS = {
     getProfile: '/api/users/profile',
     updateProfile: '/api/users/profile'
   },
+  personalInfo: {
+    get: '/api/personal-info',
+    update: '/api/personal-info',
+    updateSection: (section: string) => `/api/personal-info/${section}`
+  },
   health: {
     check: '/'
   }

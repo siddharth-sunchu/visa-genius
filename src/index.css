@@ -467,3 +467,19 @@ code {
 .ant-select-dropdown {
   transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
+
+/* Enhanced dropdown animation fixes */
+.ant-picker-dropdown .ant-picker-panel,
+.ant-select-dropdown .ant-select-option {
+  transition: background-color 0.15s ease, opacity 0.15s ease !important;
+}
+
+/* Datepicker specific smooth transitions */
+.ant-picker-cell:hover {
+  transition: background-color 0.15s ease !important;
+}
+
+/* Select dropdown option hover smooth transition */
+.ant-select-item-option:hover {
+  transition: background-color 0.15s ease !important;
+}
